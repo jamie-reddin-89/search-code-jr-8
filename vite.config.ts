@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/error-code-search-jr-11675/', // Use root path for Lovable deployment
+  base: process.env.VITE_BASE_PATH || '/',
   server: {
     host: "0.0.0.0",
     port: 8080,
