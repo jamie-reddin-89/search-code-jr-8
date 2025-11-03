@@ -121,7 +121,7 @@ export default function AdminUsers() {
             {users.map(u => (
               <li key={u.id}>
                 <button className={`w-full text-left home-button ${selected===u.id?"border-primary": ""}`} onClick={()=>setSelected(u.id)}>
-                  <div className="font-medium">{u.username || u.email || u.id.slice(0,8)}</div>
+                  <div className="font-bold text-base">{u.username || u.email || u.id.slice(0,8)}</div>
                   <div className="text-xs text-muted-foreground">Visits: {u.visits} • Role: {u.role}{u.banned?" • BANNED":""}</div>
                 </button>
               </li>
