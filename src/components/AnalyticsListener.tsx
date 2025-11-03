@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import * as React from "react";
+const { useEffect } = React;
 import { trackEvent, log } from "@/lib/tracking";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
