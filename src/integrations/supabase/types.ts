@@ -371,6 +371,296 @@ export type Database = {
         }
         Relationships: []
       }
+      brands: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          logo_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          logo_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          logo_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      models: {
+        Row: {
+          id: string
+          brand_id: string
+          name: string
+          description: string | null
+          specs: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          brand_id: string
+          name: string
+          description?: string | null
+          specs?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          brand_id?: string
+          name?: string
+          description?: string | null
+          specs?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "models_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      categories: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      media: {
+        Row: {
+          id: string
+          name: string
+          url: string
+          type: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          url: string
+          type?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          url?: string
+          type?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      urls: {
+        Row: {
+          id: string
+          name: string
+          url: string
+          category: string | null
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          url: string
+          category?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          url?: string
+          category?: string | null
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_start: string
+          session_end: string | null
+          ip_address: string | null
+          device_info: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_start?: string
+          session_end?: string | null
+          ip_address?: string | null
+          device_info?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_start?: string
+          session_end?: string | null
+          ip_address?: string | null
+          device_info?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          id: string
+          user_id: string | null
+          activity_type: string
+          path: string | null
+          meta: Json | null
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          activity_type: string
+          path?: string | null
+          meta?: Json | null
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          activity_type?: string
+          path?: string | null
+          meta?: Json | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      app_analytics: {
+        Row: {
+          id: string
+          user_id: string | null
+          device_id: string | null
+          event_type: string
+          path: string | null
+          meta: Json | null
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          device_id?: string | null
+          event_type: string
+          path?: string | null
+          meta?: Json | null
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          device_id?: string | null
+          event_type?: string
+          path?: string | null
+          meta?: Json | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      app_logs: {
+        Row: {
+          id: string
+          level: string
+          message: string
+          stack_trace: Json | null
+          user_id: string | null
+          page_path: string | null
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          level?: string
+          message: string
+          stack_trace?: Json | null
+          user_id?: string | null
+          page_path?: string | null
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          level?: string
+          message?: string
+          stack_trace?: Json | null
+          user_id?: string | null
+          page_path?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
