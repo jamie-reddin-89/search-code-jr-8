@@ -82,6 +82,8 @@ export default function ContactForm() {
             <Textarea value={message} onChange={(e: any) => setMessage(e.target.value)} />
           </div>
 
+          <div className="text-sm text-muted-foreground">Your message will be sent to <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">{CONTACT_EMAIL}</a></div>
+
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" onClick={() => { reset(); setOpen(false); }} type="button">Cancel</Button>
             <Button type="submit" disabled={loading} onClick={handleSubmit}>
