@@ -23,10 +23,10 @@ Phase 1 — Admin insert flows + app-wide propagation
 - [x] Verify new items appear app-wide in real time without refresh 
 
 Phase 2 — Users list shows all signed-up users
-- [ ] Create Edge Function admin-users to fetch Auth users via Admin API with admin check
-- [ ] Update getAllUsers() to call admin-users, fallback to current user_roles join (src/lib/userTracking.ts)
-- [ ] AdminUsers page renders email, created_at, last_sign_in_at, roles, ban/state (src/pages/AdminUsers.tsx)
-- [ ] Add refresh and error states using toast; confirm new signups appear
+- [x] Create Edge Function admin-users to fetch Auth users via Admin API with admin check
+- [x] Update getAllUsers() to call admin-users, fallback to current user_roles join (src/lib/userTracking.ts)
+- [x] AdminUsers page renders email, created_at, last_sign_in_at, roles, ban/state (src/pages/AdminUsers.tsx)
+- [x] Add refresh and error states using toast; confirm new signups appear
 
 Phase 3 — App-wide logging with live updates
 - [ ] Logger utilities (logInfo/logWarn/logError/getLogs/etc.) exist (src/lib/logger.ts)
