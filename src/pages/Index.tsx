@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Shield } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -8,23 +9,17 @@ import { TroubleshootingWizard } from "@/components/TroubleshootingWizard";
 import { PhotoDiagnosis } from "@/components/PhotoDiagnosis";
 import { CostEstimator } from "@/components/CostEstimator";
 import { Tooltip } from "@/components/Tooltip";
-
-const buttonNames = [
-  "Joule Victorum",
-  "Joule Samsung",
-  "Joule Modular Air",
-  "DeDietrich Strateo",
-  "LG Thermia",
-  "Hitachi Yutaki",
-  "Panasonic Aquarea",
-  "Grant Areona",
-  "Itec Thermia",
-  "Smart Control",
-  "System Status",
-];
+import { getAllDevices, subscribeToDevices, generateRouteSlug, type DeviceWithBrand } from "@/lib/deviceManager";
 
 const Index = () => {
   const { isAdmin } = useUserRole();
+  const [devices, setDevices] = useState<DeviceWithBrand[]>([]);
+
+  useEffect(() => {
+    getAllDevices().then(setDevices);
+    const unsubscribe = subscribeToDevices((newDevices) => setDevices(newDevices));
+    return unsubscribe;
+  }, []);
 
   return (
     <div className="page-container">
@@ -52,16 +47,17 @@ const Index = () => {
             </Link>
           </Tooltip>
 
-          {buttonNames.map((name, index) => (
-            <Tooltip key={index} content={`Open ${name} page`}>
-              <Link
-                to={`/${name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="nav-button"
-              >
-                {name}
-              </Link>
-            </Tooltip>
-          ))}
+          {devices.map((d) => {
+            const name = `${d.brand?.name || "Unknown Brand"} — ${d.name}`;
+            const slug = generateRouteSlug(d.brand?.name || "", d.name);
+            return (
+              <Tooltip key={d.id} content={`Open ${name} page`}>
+                <Link to={`/${slug}`} className="nav-button">
+                  {name}
+                </Link>
+              </Tooltip>
+            );
+          })}
 
           {isAdmin && (
             <Tooltip content="Open admin dashboard">
