@@ -65,9 +65,9 @@ export default function AdminAddErrorInfo() {
           .from("error_info")
           .select("*")
           .order("created_at", { ascending: false }),
-        supabase.from("brands").select("*").order("name"),
-        supabase.from("models").select("*").order("name"),
-        supabase.from("categories").select("*").order("name"),
+        supabase.from("public.brands").select("*").order("name"),
+        supabase.from("public.models").select("*").order("name"),
+        supabase.from("public.categories").select("*").order("name"),
       ]);
 
       if (listResult.data) setList(listResult.data);
