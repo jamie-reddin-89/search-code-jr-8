@@ -123,9 +123,10 @@ Deno.serve(async (req) => {
     const enrichedUsers = authUsers.map((user: any) => {
       const roleData = userRoles[user.id];
       return {
-        id: user.id,
+        id: roleData?.id,
+        user_id: user.id,
         email: user.email,
-        created_at: user.created_at,
+        created_at: roleData?.created_at || user.created_at,
         last_sign_in_at: user.last_sign_in_at,
         role: roleData?.role || "user",
         banned: roleData?.banned || false,
