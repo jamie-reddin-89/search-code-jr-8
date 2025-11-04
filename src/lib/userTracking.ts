@@ -327,3 +327,51 @@ export async function getUserWithStats(userId: string): Promise<any | null> {
     return null;
   }
 }
+
+/**
+ * Create a new user with auth and role
+ */
+export async function createUser(
+  email: string,
+  password: string,
+  fullName: string,
+  role: "user" | "moderator" | "admin" = "user"
+): Promise<{ success: boolean; error?: string; user?: any }> {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session?.access_token) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const functionUrl = `${supabaseUrl}/functions/v1/create-user`;
+
+    const response = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${sessionData.session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: fullName,
+        role,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: data.error || "Failed to create user" };
+    }
+
+    return { success: true, user: data.user };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "An error occurred",
+    };
+  }
+}
