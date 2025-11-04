@@ -68,6 +68,7 @@ const App = () => (
               <Route path="/admin/add-error-code" element={<AdminRoute><AdminAddErrorCode /></AdminRoute>} />
               <Route path="/admin/add-device" element={<AdminRoute><AdminAddDevice /></AdminRoute>} />
               <Route path="/pdf-files" element={<ButtonPage title="PDF Files" />} />
+              <Route path="/device/:slug" element={<DevicePage />} />
               {buttonRoutes.map((route, index) => (
                 <Route key={index} path={route.path} element={route.element} />
               ))}
