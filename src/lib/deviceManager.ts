@@ -46,31 +46,20 @@ export async function getAllDevices(): Promise<DeviceWithBrand[]> {
   }
 
   try {
-    const { data: models, error: modelsError } = await supabase
-      .from("models" as any)
-      .select("*");
+    const { data, error } = await supabase
+      .from("public.models" as any)
+      .select("*, brands(*)");
 
-    if (modelsError) {
-      const mErrMsg = (modelsError as any)?.message ?? JSON.stringify(modelsError);
-      console.warn("Error querying 'models' table, returning empty list:", mErrMsg);
+    if (error) {
+      const mErrMsg = (error as any)?.message ?? JSON.stringify(error);
+      console.warn("Error querying 'public.models' table, returning empty list:", mErrMsg);
       return [];
     }
-    if (!models || (Array.isArray(models) && models.length === 0)) return [];
+    if (!data || (Array.isArray(data) && data.length === 0)) return [];
 
-    const { data: brands, error: brandsError } = await supabase
-      .from("brands" as any)
-      .select("*");
-
-    if (brandsError) {
-      const bErrMsg = (brandsError as any)?.message ?? JSON.stringify(brandsError);
-      throw new Error(`Error querying 'brands' table: ${bErrMsg}`);
-    }
-
-    const brandMap = new Map(brands?.map((b: any) => [b.id, b]) || []);
-
-    return models.map((model: any) => ({
+    return (data as any[]).map((model: any) => ({
       ...model,
-      brand: brandMap.get(model.brand_id),
+      brand: model.brands,
     }));
   } catch (error) {
     const errMsg = (error as any)?.message ?? JSON.stringify(error, Object.getOwnPropertyNames(error));
@@ -117,41 +106,23 @@ export async function getDeviceBySlug(slug: string): Promise<DeviceWithBrand | n
     const parts = slug.split("-");
     if (parts.length < 2) return null;
 
-    // Reconstruct brand and model names from slug
-    // This is a simple heuristic - assumes first word is brand
-    const possibleBrandNames = [
-      parts[0],
-      parts.slice(0, 2).join("-"),
-      parts.slice(0, 3).join("-"),
-    ];
-
     const { data: brands, error: brandsError } = await supabase
-      .from("brands" as any)
+      .from("public.brands" as any)
       .select("*");
-
     if (brandsError) throw brandsError;
 
-    let matchedBrand = null;
-    for (const brandName of possibleBrandNames) {
-      const brand = brands?.find((b: any) => 
-        b.name.toLowerCase().replace(/\s+/g, "-") === brandName
-      );
-      if (brand) {
-        matchedBrand = brand;
-        break;
-      }
-    }
-
+    const matchedBrand = (brands || []).find((b: any) =>
+      slug.startsWith(b.name.toLowerCase().replace(/\s+/g, "-") + "-")
+    );
     if (!matchedBrand) return null;
 
-    const { data: model, error: modelError } = await supabase
-      .from("models" as any)
+    const { data: models, error: modelsError } = await supabase
+      .from("public.models" as any)
       .select("*")
       .eq("brand_id", matchedBrand.id);
+    if (modelsError) throw modelsError;
 
-    if (modelError) throw modelError;
-
-    const matchedModel = model?.find((m: any) => 
+    const matchedModel = (models || []).find((m: any) =>
       generateRouteSlug(matchedBrand.name, m.name) === slug
     );
 
