@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Home, ArrowLeft, Users, Shield, Ban, Check, KeyRound, RefreshCw, LogOut } from "lucide-react";
+import { Home, ArrowLeft, Users, Shield, Ban, Check, KeyRound, RefreshCw, LogOut, Plus } from "lucide-react";
 import TopRightControls from "@/components/TopRightControls";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -19,6 +28,7 @@ import {
   unbanUser,
   changeUserRole,
   getAllUsers,
+  createUser,
   type UserStats,
 } from "@/lib/userTracking";
 
@@ -45,6 +55,14 @@ export default function AdminUsers() {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    role: "user" as "user" | "moderator" | "admin",
+  });
+  const [creatingUser, setCreatingUser] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -209,6 +227,56 @@ export default function AdminUsers() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!createFormData.email || !createFormData.password) {
+      toast({
+        title: "Error",
+        description: "Email and password are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setCreatingUser(true);
+      const result = await createUser(
+        createFormData.email,
+        createFormData.password,
+        createFormData.fullName,
+        createFormData.role
+      );
+
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: `User ${createFormData.email} created successfully`,
+        });
+        setCreateFormData({
+          email: "",
+          password: "",
+          fullName: "",
+          role: "user",
+        });
+        setCreateDialogOpen(false);
+        handleRefresh();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create user",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
   const selectedUser = users.find((u) => u.user_id === selectedUserId);
   const sortedUsers = [...users].sort((a, b) => {
     const aName = a.username || a.email || a.user_id.slice(0, 8);
@@ -246,7 +314,105 @@ export default function AdminUsers() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Users size={20} /> Users
         </h1>
-        <div className="w-10" />
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="icon" aria-label="Create new user">
+              <Plus className="h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New User</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={createFormData.email}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      email: e.target.value,
+                    })
+                  }
+                  disabled={creatingUser}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter password"
+                  value={createFormData.password}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      password: e.target.value,
+                    })
+                  }
+                  disabled={creatingUser}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={createFormData.fullName}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      fullName: e.target.value,
+                    })
+                  }
+                  disabled={creatingUser}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select
+                  value={createFormData.role}
+                  onValueChange={(value) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      role: value as "user" | "moderator" | "admin",
+                    })
+                  }
+                  disabled={creatingUser}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="moderator">Moderator</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setCreateDialogOpen(false)}
+                  disabled={creatingUser}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateUser}
+                  disabled={creatingUser}
+                >
+                  {creatingUser ? "Creating..." : "Create User"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </header>
 
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -308,6 +474,26 @@ export default function AdminUsers() {
                 <div>
                   <span className="font-medium">Email:</span>
                   <div>{selectedUser.email || "-"}</div>
+                </div>
+                <div>
+                  <span className="font-medium">Created:</span>
+                  <div>
+                    {selectedUser.created_at
+                      ? new Date(selectedUser.created_at).toLocaleDateString() +
+                        " " +
+                        new Date(selectedUser.created_at).toLocaleTimeString()
+                      : "-"}
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium">Last Sign In:</span>
+                  <div>
+                    {selectedUser.last_sign_in_at
+                      ? new Date(selectedUser.last_sign_in_at).toLocaleDateString() +
+                        " " +
+                        new Date(selectedUser.last_sign_in_at).toLocaleTimeString()
+                      : "Never"}
+                  </div>
                 </div>
                 <div>
                   <span className="font-medium">Role:</span>

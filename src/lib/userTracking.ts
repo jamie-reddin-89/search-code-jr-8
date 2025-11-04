@@ -260,17 +260,46 @@ export async function resetUserPassword(email: string): Promise<boolean> {
 }
 
 /**
- * Get all users with their role info
+ * Get all users with their role info and auth details
  */
 export async function getAllUsers(): Promise<any[]> {
   try {
-    const { data, error } = await supabase
+    // Fetch user_roles table
+    const { data: userRoles, error: rolesError } = await supabase
       .from("user_roles" as any)
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+    if (rolesError) throw rolesError;
+
+    const roles = userRoles || [];
+    if (roles.length === 0) return [];
+
+    // Fetch profiles to get email and created_at from auth
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles" as any)
+      .select("*");
+
+    if (profilesError) {
+      console.warn("Error fetching profiles:", profilesError);
+    }
+
+    const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+
+    // Combine user_roles with profile data to get email and auth timestamps
+    const enrichedUsers = roles.map((role: any) => {
+      const profile = profileMap.get(role.user_id);
+      return {
+        id: role.id,
+        user_id: role.user_id,
+        email: profile?.email,
+        created_at: role.created_at || profile?.created_at,
+        role: role.role,
+        banned: role.banned || false,
+      };
+    });
+
+    return enrichedUsers;
   } catch (error) {
     console.error("Error fetching users:", error);
     return [];
@@ -296,5 +325,53 @@ export async function getUserWithStats(userId: string): Promise<any | null> {
   } catch (error) {
     console.error("Error fetching user with stats:", error);
     return null;
+  }
+}
+
+/**
+ * Create a new user with auth and role
+ */
+export async function createUser(
+  email: string,
+  password: string,
+  fullName: string,
+  role: "user" | "moderator" | "admin" = "user"
+): Promise<{ success: boolean; error?: string; user?: any }> {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session?.access_token) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const functionUrl = `${supabaseUrl}/functions/v1/create-user`;
+
+    const response = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${sessionData.session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: fullName,
+        role,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: data.error || "Failed to create user" };
+    }
+
+    return { success: true, user: data.user };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "An error occurred",
+    };
   }
 }
