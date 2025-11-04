@@ -227,6 +227,56 @@ export default function AdminUsers() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!createFormData.email || !createFormData.password) {
+      toast({
+        title: "Error",
+        description: "Email and password are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setCreatingUser(true);
+      const result = await createUser(
+        createFormData.email,
+        createFormData.password,
+        createFormData.fullName,
+        createFormData.role
+      );
+
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: `User ${createFormData.email} created successfully`,
+        });
+        setCreateFormData({
+          email: "",
+          password: "",
+          fullName: "",
+          role: "user",
+        });
+        setCreateDialogOpen(false);
+        handleRefresh();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create user",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
   const selectedUser = users.find((u) => u.user_id === selectedUserId);
   const sortedUsers = [...users].sort((a, b) => {
     const aName = a.username || a.email || a.user_id.slice(0, 8);
