@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { trackEvent, log } from "@/lib/tracking";
+import { trackEvent } from "@/lib/tracking";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/logger";
 
 export default function AnalyticsListener() {
   const location = useLocation();
