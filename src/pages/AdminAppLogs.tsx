@@ -68,6 +68,45 @@ export default function AdminAppLogs() {
     }
   };
 
+  const subscribeToLogs = () => {
+    const subscription = (supabase as any)
+      .channel("app_logs_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "app_logs",
+        },
+        (payload: any) => {
+          if (payload.eventType === "INSERT") {
+            setLogs((prev) => [payload.new, ...prev]);
+            if (stats) {
+              setStats((prev) =>
+                prev ? {
+                  ...prev,
+                  totalLogs: prev.totalLogs + 1,
+                  [payload.new.level === "error" ? "errorCount" : payload.new.level === "warn" ? "warnCount" : "infoCount"]: prev[payload.new.level === "error" ? "errorCount" : payload.new.level === "warn" ? "warnCount" : "infoCount"] + 1,
+                  latestLog: payload.new,
+                } : null
+              );
+            }
+          } else if (payload.eventType === "DELETE") {
+            setLogs((prev) => prev.filter((l) => l.id !== payload.old.id));
+          } else if (payload.eventType === "UPDATE") {
+            setLogs((prev) =>
+              prev.map((l) => (l.id === payload.new.id ? payload.new : l))
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
       await loadLogs();
