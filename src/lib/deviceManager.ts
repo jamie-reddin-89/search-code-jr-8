@@ -261,3 +261,44 @@ export function subscribeToDevices(callback: (devices: DeviceWithBrand[]) => voi
     modelsSubscription.unsubscribe();
   };
 }
+
+/**
+ * Subscribe to metadata tables changes (categories, tags, media, urls)
+ * Calls the provided callback on any change
+ */
+export function subscribeToMetadata(onChange: () => void) {
+  const categoriesSub = supabase
+    .channel("categories-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, () => {
+      onChange();
+    })
+    .subscribe();
+
+  const tagsSub = supabase
+    .channel("tags-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tags" }, () => {
+      onChange();
+    })
+    .subscribe();
+
+  const mediaSub = supabase
+    .channel("media-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "media" }, () => {
+      onChange();
+    })
+    .subscribe();
+
+  const urlsSub = supabase
+    .channel("urls-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "urls" }, () => {
+      onChange();
+    })
+    .subscribe();
+
+  return () => {
+    categoriesSub.unsubscribe();
+    tagsSub.unsubscribe();
+    mediaSub.unsubscribe();
+    urlsSub.unsubscribe();
+  };
+}
