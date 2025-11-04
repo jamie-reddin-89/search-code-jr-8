@@ -1,8 +1,8 @@
 # Implementation Plan (Admin + App-wide Enhancements)
 
 Owner: Admin (jayjay.r@outlook.com)
-Current version (Settings > About): 1.9.5
-Target version after implementation: 1.9.5
+Current version (Settings > About): 1.9.6
+Target version after implementation: 1.9.6
 
 Legend: [ ] pending • [x] complete • [~] partial
 
@@ -29,11 +29,11 @@ Phase 2 — Users list shows all signed-up users
 - [x] Add refresh and error states using toast; confirm new signups appear
 
 Phase 3 — App-wide logging with live updates
-- [ ] Logger utilities (logInfo/logWarn/logError/getLogs/etc.) exist (src/lib/logger.ts)
-- [ ] Admin logs page exists (src/pages/AdminAppLogs.tsx)
-- [ ] Add Supabase realtime subscription on app_logs; append new entries live and update stats
-- [ ] Wire global handlers: window.onerror/unhandledrejection -> logError (src/components/AnalyticsListener.tsx)
-- [ ] Optional: Add React ErrorBoundary to capture render errors and logError
+- [x] Logger utilities (logInfo/logWarn/logError/getLogs/etc.) exist (src/lib/logger.ts)
+- [x] Admin logs page exists (src/pages/AdminAppLogs.tsx)
+- [x] Add Supabase realtime subscription on app_logs; append new entries live and update stats
+- [x] Wire global handlers: window.onerror/unhandledrejection -> logError (src/components/AnalyticsListener.tsx)
+- [x] Optional: Add React ErrorBoundary to capture render errors and logError
 
 Phase 4 — Analytics capture + Admin analytics
 - [ ] app_analytics + search_analytics tables available (types present)

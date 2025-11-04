@@ -22,6 +22,7 @@ import AIAssistant from "./components/AIAssistant";
 import AdminRoute from "./components/AdminRoute";
 import AnalyticsListener from "./components/AnalyticsListener";
 import SyncBridge from "./components/SyncBridge";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +52,8 @@ const App = () => (
           <Sonner />
           <InstallPrompt />
           <AIAssistant />
-          <HashRouter>
+          <ErrorBoundary>
+            <HashRouter>
             <AnalyticsListener />
             <SyncBridge />
             <Routes>
@@ -71,7 +73,8 @@ const App = () => (
                 <Route key={index} path={route.path} element={route.element} />
               ))}
             </Routes>
-          </HashRouter>
+            </HashRouter>
+          </ErrorBoundary>
         </TooltipToggleProvider>
       </TooltipProvider>
     </ThemeProvider>
